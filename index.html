@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUITCASE AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+    }
+
+    .form-section h2 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .business-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .type-button {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .type-button.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    button {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      width: 100%;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .conversation {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 15px;
+    }
+
+    .message.user {
+      text-align: right;
+    }
+
+    .message.user .text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px 4px 12px 12px;
+    }
+
+    .message.assistant .text {
+      background: white;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px 12px 12px 12px;
+    }
+
+    .message .text {
+      display: inline-block;
+      max-width: 80%;
+      padding: 12px 16px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .message .label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .stage {
+      display: none;
+    }
+
+    .stage.active {
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      min-height: 100px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .button-group button {
+      flex: 1;
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .error {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c33;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="language-toggle" onclick="toggleLang()">العربية</button>
+
+    <div class="card">
+      <div class="header">
+        <h1>SUITCASE AI</h1>
+        <p>Your AI-Powered Marketing Strategy Coach</p>
+      </div>
+
+      <div class="content">
+        <div class="stage active" id="select-stage">
+          <div class="form-section">
+            <h2>What's your business type?</h2>
+            <div class="business-types">
+              <button class="type-button" onclick="pickBiz('retail')">Retail</button>
+              <button class="type-button" onclick="pickBiz('coffee')">Coffee</button>
+              <button class="type-button" onclick="pickBiz('bakery')">Bakery</button>
+              <button class="type-button" onclick="pickBiz('food')">Restaurant</button>
+              <button class="type-button" onclick="pickBiz('services')">Services</button>
+              <button class="type-button" onclick="pickBiz('other')">Other</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Business size?</h2>
+            <div class="business-types">
+              <button class="type-button" onclick="pickSize('small')">Small</button>
+              <button class="type-button" onclick="pickSize('medium')">Medium</button>
+            </div>
+          </div>
+
+          <button id="startBtn" onclick="start()" disabled>Start</button>
+        </div>
+
+        <div class="stage" id="chat-stage">
+          <div id="error" class="error" style="display:none;"></div>
+          <div class="conversation" id="conv"></div>
+
+          <div style="margin-bottom: 20px;">
+            <textarea id="input" placeholder="Your message..." onkeypress="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+          </div>
+
+          <div class="button-group">
+            <button onclick="send()">Send</button>
+            <button class="btn-secondary" onclick="reset()">New</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let biz = '', size = '', lang = 'en';
+    const sid = 'sid-' + Date.now();
+
+    function toggleLang() {
+      lang = lang === 'en' ? 'ar' : 'en';
+    }
+
+    function pickBiz(b) {
+      biz = b;
+      document.querySelectorAll('.type-button').forEach(btn => btn.classList.remove('selected'));
+      event.target.classList.add('selected');
+      check();
+    }
+
+    function pickSize(s) {
+      size = s;
+      document.querySelectorAll('.type-button').forEach(btn => btn.classList.remove('selected'));
+      event.target.classList.add('selected');
+      check();
+    }
+
+    function check() {
+      document.getElementById('startBtn').disabled = !biz || !size;
+    }
+
+    function start() {
+      document.getElementById('select-stage').classList.remove('active');
+      document.getElementById('chat-stage').classList.add('active');
+      addMsg('SUITCASE AI', 'Tell me about your business and marketing efforts.');
+    }
+
+    function addMsg(role, text) {
+      const div = document.createElement('div');
+      div.className = 'message ' + (role === 'You' ? 'user' : 'assistant');
+      div.innerHTML = `<div class="label">${role}</div><div class="text">${text}</div>`;
+      document.getElementById('conv').appendChild(div);
+      document.getElementById('conv').scrollTop = document.getElementById('conv').scrollHeight;
+    }
+
+    function send() {
+      const msg = document.getElementById('input').value.trim();
+      if (!msg) return;
+
+      addMsg('You', msg);
+      document.getElementById('input').value = '';
+      document.getElementById('input').disabled = true;
+
+      const loading = document.createElement('div');
+      loading.className = 'message assistant';
+      loading.id = 'load';
+      loading.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      document.getElementById('conv').appendChild(loading);
+      document.getElementById('conv').scrollTop = document.getElementById('conv').scrollHeight;
+
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessType: biz, businessSize: size, message: msg, sessionId: sid, language: lang })
+      })
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('load')?.remove();
+        if (d.success) {
+          addMsg('SUITCASE AI', d.message);
+        } else {
+          document.getElementById('error').textContent = d.error;
+          document.getElementById('error').style.display = 'block';
+        }
+        document.getElementById('input').disabled = false;
+      })
+      .catch(e => {
+        document.getElementById('load')?.remove();
+        document.getElementById('error').textContent = 'Error: ' + e.message;
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('input').disabled = false;
+      });
+    }
+
+    function reset() {
+      document.getElementById('select-stage').classList.add('active');
+      document.getElementById('chat-stage').classList.remove('active');
+      document.getElementById('conv').innerHTML = '';
+      document.getElementById('input').value = '';
+      biz = '';
+      size = '';
+      check();
+    }
+  </script>
+</body>
+</html>
