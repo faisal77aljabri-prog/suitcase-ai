@@ -1,0 +1,8 @@
+{
+  "name": "suitcase-ai",
+  "version": "1.0.0",
+  "description": "SUITCASE AI - Marketing Strategy Coach",
+  "scripts": {
+    "build": "echo 'No build needed'"
+  }
+}
